@@ -47,11 +47,13 @@ key ditzy_text_key = NULL_KEY;
 key ditzy_try_key = NULL_KEY;
 integer g_iConfigLine=0;
 integer g_iGL;
+integer g_iGL2;
 integer g_iChan;
 string g_sWearer;
 integer g_bGoodConfig=FALSE;
 integer g_bIsDitzy=FALSE;
 integer g_bLocked=FALSE;
+integer isGagged=FALSE;
 
 integer istrue(string data)
 {
@@ -68,11 +70,12 @@ integer istrue(string data)
 load_config()
 {
     llSetTimerEvent(0.0);
+    g_bGoodConfig = FALSE;
     llOwnerSay("As you put on the mysteriously labeled CBA you feel a tingle in your head, and strange thoughts start filling your mind.");
     if (llGetInventoryType(g_sConfigNotecard) != INVENTORY_NOTECARD)
     {
         llOwnerSay("Missing configuration notecard: " + g_sConfigNotecard);
-        llOwnerSay("@detach=y");
+        llOwnerSay("@clear");
         return;
     }
     if (llGetInventoryType("bimbo-random") == INVENTORY_NOTECARD)
@@ -140,7 +143,7 @@ apply_config()
         }
 
         llListenControl(g_iGL, TRUE);
-        clear_ditzy();
+        apply_ditzy();
     }
     else
     {
@@ -166,20 +169,21 @@ pick_random_message_time()
 
 apply_ditzy()
 {
-    llOwnerSay("@" + llDumpList2String(ditzy_rlv, "=n,") + "=n");
-}
-
-clear_ditzy()
-{
-    integer count = 0;
-    for
-    (; count < llGetListLength(ditzy_rlv); count++)
+    string clear = "@clear,notify:"+(string)(g_iChan+1)+";sendchat=add,notify:"+(string)(g_iChan+1)+";clear=add";
+    if (!isGagged)
     {
-        llOwnerSay("@clear=" + llList2String(ditzy_rlv, count));
+        clear += ",redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
     }
-    llOwnerSay("@clear=rediremote");
-    llOwnerSay("@clear=redirchat");
-    llOwnerSay("@rediremote:"+(string)g_iChan+"=add,redirchat:"+(string)g_iChan+"=add");
+    if (g_bLocked)
+    {
+        clear += ",detach=n";
+    }
+    llOwnerSay(clear);
+
+    if (g_bIsDitzy)
+    {
+        llOwnerSay("@" + llDumpList2String(ditzy_rlv, "=n,") + "=n");
+    }
 }
 
 process_config(string data)
@@ -434,9 +438,7 @@ talker_say(string message)
 
 startup()
 {
-        llOwnerSay("@clear");
-        llSleep(0.1);
-        llOwnerSay("@detach=n");
+        llOwnerSay("@clear,detach=n");
         g_sWearer = llGetDisplayName(llGetOwner());
 }
 
@@ -452,7 +454,10 @@ default
     {
         g_iChan = llRound(llFrand(499) + 2000);
         g_iGL = llListen(g_iChan, "", llGetOwner(), "");
+        llListen(g_iChan+1, "", llGetOwner(), "");
+        g_iGL2 = llListen(g_iChan+2, "", llGetOwner(), "");
         llListenControl(g_iGL, FALSE);
+        llListenControl(g_iGL2, FALSE);
         startup();
         load_config();
     }
@@ -504,6 +509,51 @@ default
                 talker_say(sOut);
             }
         }
+        if (channel == g_iChan+1)
+        {
+            if (llGetSubString(message, 0, 6) == "/notify")
+            {
+                return;
+            }
+            llListenControl(g_iGL2, TRUE);
+            llOwnerSay("@getstatusall:sendchat="+(string)(g_iChan+2));
+        }
+        if (channel == g_iChan+2)
+        {
+            llListenControl(g_iGL2, FALSE);
+            list messages = llParseString2List(message, ["/"], []);
+            integer curmess = 0;
+            integer totmess = llGetListLength(messages);
+            integer statusrefresh = FALSE;
+            integer sendchat = FALSE;
+            integer foundgag = FALSE;
+            for (; curmess < totmess; curmess++)
+            {
+                string rlvcmd = llList2String(messages, curmess);
+                if (rlvcmd == "notify:"+(string)(g_iChan+1)+";sendchat")
+                {
+                    sendchat = TRUE;
+                }
+                else if (rlvcmd == "sendchat")
+                {
+                    foundgag = TRUE;
+                }
+            }
+            if (sendchat && !foundgag && isGagged)
+            {
+                isGagged = FALSE;
+                statusrefresh = TRUE;
+            }
+            if (sendchat && foundgag && !isGagged)
+            {
+                isGagged = TRUE;
+                statusrefresh = TRUE;
+            }
+            if (statusrefresh)
+            {
+                apply_ditzy();
+            }
+        }
     }
 
     changed(integer change)
@@ -515,7 +565,8 @@ default
 
         if(change & CHANGED_INVENTORY)
         {
-            llResetScript();
+            startup();
+            load_config();
         }
     }
 
@@ -525,14 +576,14 @@ default
         if (g_bIsDitzy)
         {
             g_bIsDitzy=FALSE;
-            clear_ditzy();
+            apply_ditzy();
             if (num_ditzy_end > 0)
             {
                 say_key = llGetNotecardLine("ditzy-end", (integer)llFrand((float)num_ditzy_end));
             }
             llOwnerSay("You no longer are spacing out.");
         }
-        else
+        else if (!isGagged)
         {
             if (num_bimbo_random > 0)
             {
