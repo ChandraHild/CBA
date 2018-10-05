@@ -46,6 +46,7 @@ key bimbo_random_key = NULL_KEY;
 key ditzy_end_key = NULL_KEY;
 key ditzy_text_key = NULL_KEY;
 key ditzy_try_key = NULL_KEY;
+key rating_check_key = NULL_KEY;
 integer g_iConfigLine=0;
 integer g_iGL;
 integer g_iGL2;
@@ -55,6 +56,7 @@ integer g_bGoodConfig=FALSE;
 integer g_bIsDitzy=FALSE;
 integer g_bLocked=FALSE;
 integer isGagged=FALSE;
+integer is_safe_sim = FALSE;
 
 integer istrue(string data)
 {
@@ -447,6 +449,7 @@ startup()
 {
         llOwnerSay("@clear,detach=n");
         g_sWearer = llGetDisplayName(llGetOwner());
+        rating_check_key = llRequestSimulatorData(llGetRegionName(), DATA_SIM_RATING);
 }
 
 default
@@ -576,6 +579,12 @@ default
             startup();
             load_config();
         }
+
+        if (change & CHANGED_TELEPORT)
+        {
+            rating_check_key = llRequestSimulatorData(llGetRegionName(), DATA_SIM_RATING);
+            apply_ditzy();
+        }
     }
 
     timer()
@@ -591,7 +600,7 @@ default
             }
             llOwnerSay("You no longer are spacing out.");
         }
-        else if (!isGagged)
+        else if (!isGagged && is_safe_sim)
         {
             if (num_bimbo_random > 0)
             {
@@ -626,6 +635,17 @@ default
         else if (request_id == ditzy_try_key)
         {
             num_ditzy_try = (integer)data;
+        }
+        else if (request_id == rating_check_key)
+        {
+            if (data == "PG")
+            {
+                is_safe_sim = FALSE;
+            }
+            else
+            {
+                is_safe_sim = TRUE;
+            }
         }
     }
 
