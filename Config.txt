@@ -17,7 +17,9 @@ ditzy_on=y
 ditzy_chance=2
 
 # Duration of ditziness
-ditzy_time=30
+ditzy_min_time=30
+ditzy_max_time=120
+
 
 # RLV restrictions to apply when ditzy
 ditzy_rlv=startim,sendim,recvim,tplm,tploc,tplure,fly,temprun,alwaysrun,showinv,viewnote,touchall,showloc,showminimap,showworldmap,shownames
