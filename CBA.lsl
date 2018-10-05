@@ -18,7 +18,8 @@ string renamer_name="";
 string renamer_prefix="";
 string renamer_full="";
 integer ditzy_chance=0;
-integer ditzy_time=60;
+integer ditzy_min_time=30;
+integer ditzy_max_time=120;
 list ditzy_rlv;
 integer bimbo_say_skip=4;
 integer bimbo_say_mid_chance=10;
@@ -242,9 +243,13 @@ process_config(string data)
                 {
                     ditzy_chance = (integer)value;
                 }
-                else if (name == "ditzy_time")
+                else if (name == "ditzy_min_time")
                 {
-                    ditzy_time = (integer)value;
+                    ditzy_min_time = (integer)value;
+                }
+                else if (name == "ditzy_max_time")
+                {
+                    ditzy_max_time = (integer)value;
                 }
                 else if (name == "ditzy_rlv")
                 {
@@ -328,7 +333,8 @@ string strReplace(string str, string search, string replace) {
 string bimbo_replace(string word)
 {
     integer z = 0;
-    for (; z < llGetListLength(bimbo_say_replace); z++)
+    integer listlen = llGetListLength(bimbo_say_replace);
+    for (; z < listlen; z++)
     {
         list replace = llParseStringKeepNulls(llList2String(bimbo_say_replace, z), ["|"], []);
         if (word == llList2String(replace, 0))
@@ -356,7 +362,8 @@ string process_say(string message)
     
     integer bimbo_distance = 0;
     integer x = 0;
-    for (; x < llGetListLength(mid); x++)
+    integer listlen = llGetListLength(mid);
+    for (; x < listlen; x++)
     {
         string y = bimbo_replace(llList2String(mid, x));
         output += y;
@@ -494,12 +501,13 @@ default
                         llSetTimerEvent(0.0);
                         g_bIsDitzy = TRUE;
                         apply_ditzy();
-                        llSetTimerEvent((float)ditzy_time);
+                        integer timediff = ditzy_max_time - ditzy_min_time;
+                        llSetTimerEvent(llFrand((float)timediff) + (float)ditzy_min_time);
                         if (num_ditzy_text > 0)
                         {
                             say_key = llGetNotecardLine("ditzy-text", (integer)llFrand((float)num_ditzy_text));
                         }
-                        llOwnerSay("You are spacing out for " + (string)ditzy_time + " seconds!");
+                        llOwnerSay("You are spacing out for a bit!");
                     }
                     else
                     {
