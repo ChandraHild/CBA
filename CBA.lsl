@@ -55,7 +55,9 @@ string g_sWearer;
 integer g_bGoodConfig=FALSE;
 integer g_bIsDitzy=FALSE;
 integer g_bLocked=FALSE;
-integer isGagged=FALSE;
+integer outsideRLV=0; // 1 for gag, 2 for whisper
+integer foundRLV=0; // 1 for gag, 2 for whisper
+integer gagCheck=0;
 integer is_safe_sim = FALSE;
 
 integer istrue(string data)
@@ -172,8 +174,8 @@ pick_random_message_time()
 
 apply_ditzy()
 {
-    string clear = "@clear,notify:"+(string)(g_iChan+1)+";sendchat=add,notify:"+(string)(g_iChan+1)+";clear=add";
-    if (!isGagged)
+    string clear = "@clear,notify:"+(string)(g_iChan+1)+";chat=add,notify:"+(string)(g_iChan+1)+";clear=add,notify:"+(string)(g_iChan+1)+";sendchannel=add";
+    if (!(outsideRLV & 1))
     {
         clear += ",redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
     }
@@ -441,7 +443,14 @@ talker_say(string message)
     {
         llSetObjectName(g_sWearer);
     }
-    llSay(0, message);
+    if (outsideRLV & 2)
+    {
+        llWhisper(0, message);
+    }
+    else
+    {
+        llSay(0, message);
+    }
     llSetObjectName(sOldName);
 }
 
@@ -462,7 +471,7 @@ default
 
     state_entry()
     {
-        g_iChan = llRound(llFrand(499) + 2000);
+        g_iChan = (integer)llFrand(499) + 20000;
         g_iGL = llListen(g_iChan, "", llGetOwner(), "");
         llListen(g_iChan+1, "", llGetOwner(), "");
         g_iGL2 = llListen(g_iChan+2, "", llGetOwner(), "");
@@ -517,7 +526,10 @@ default
                         sOut = process_say(message);
                     }
                 }
-                talker_say(sOut);
+                if (sOut != "")
+                {
+                    talker_say(sOut);
+                }
             }
         }
         if (channel == g_iChan+1)
@@ -527,42 +539,43 @@ default
                 return;
             }
             llListenControl(g_iGL2, TRUE);
-            llOwnerSay("@getstatusall:sendchat="+(string)(g_iChan+2));
+            gagCheck=2;
+            foundRLV=0;
+            llOwnerSay("@getstatusall:chat="+(string)(g_iChan+2));
+            llOwnerSay("@getstatusall:sendchannel="+(string)(g_iChan+2));
         }
         if (channel == g_iChan+2)
         {
-            llListenControl(g_iGL2, FALSE);
+            --gagCheck;
             list messages = llParseString2List(message, ["/"], []);
+            list gags = ["sendchat", "sendchannel", "sendchannel_sec"];
             integer curmess = 0;
             integer totmess = llGetListLength(messages);
-            integer statusrefresh = FALSE;
-            integer sendchat = FALSE;
-            integer foundgag = FALSE;
             for (; curmess < totmess; curmess++)
             {
                 string rlvcmd = llList2String(messages, curmess);
-                if (rlvcmd == "notify:"+(string)(g_iChan+1)+";sendchat")
+                if (~llListFindList(gags, [rlvcmd]))
                 {
-                    sendchat = TRUE;
+                    foundRLV = foundRLV | 1;
                 }
-                else if (rlvcmd == "sendchat")
+                else if (rlvcmd == "chatnormal")
                 {
-                    foundgag = TRUE;
+                    foundRLV = foundRLV | 2;
                 }
             }
-            if (sendchat && !foundgag && isGagged)
+            if (gagCheck == 0)
             {
-                isGagged = FALSE;
-                statusrefresh = TRUE;
-            }
-            if (sendchat && foundgag && !isGagged)
-            {
-                isGagged = TRUE;
-                statusrefresh = TRUE;
-            }
-            if (statusrefresh)
-            {
-                apply_ditzy();
+                llListenControl(g_iGL2, FALSE);
+                integer statusrefresh = FALSE;
+                if (foundRLV != outsideRLV)
+                {
+                    outsideRLV = foundRLV;
+                    statusrefresh = TRUE;
+                }
+                if (statusrefresh)
+                {
+                    apply_ditzy();
+                }
             }
         }
     }
@@ -600,7 +613,7 @@ default
             }
             llOwnerSay("You no longer are spacing out.");
         }
-        else if (!isGagged && is_safe_sim)
+        else if (!(outsideRLV & 1) && is_safe_sim)
         {
             if (num_bimbo_random > 0)
             {
