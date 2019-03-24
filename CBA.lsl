@@ -52,13 +52,13 @@ integer g_iGL;
 integer g_iGL2;
 integer g_iChan;
 string g_sWearer;
-integer g_bGoodConfig=FALSE;
 integer g_bIsDitzy=FALSE;
-integer g_bLocked=FALSE;
+integer global_disabled=TRUE;
 integer outsideRLV=0; // 1 for gag, 2 for whisper
 integer foundRLV=0; // 1 for gag, 2 for whisper
 integer gagCheck=0;
 integer is_safe_sim = FALSE;
+integer phrases_allowed = TRUE;
 
 integer istrue(string data)
 {
@@ -75,8 +75,6 @@ integer istrue(string data)
 load_config()
 {
     llSetTimerEvent(0.0);
-    g_bGoodConfig = FALSE;
-    llOwnerSay("As you put on the mysteriously labeled CBA you feel a tingle in your head, and strange thoughts start filling your mind.");
     if (llGetInventoryType(g_sConfigNotecard) != INVENTORY_NOTECARD)
     {
         llOwnerSay("Missing configuration notecard: " + g_sConfigNotecard);
@@ -124,10 +122,10 @@ load_config()
 
 apply_config()
 {
-    if (!g_bGoodConfig)
+    if (global_disabled)
     {
-        llOwnerSay("Bad configuration detected, resetting script . . .");
-        llResetScript();
+        llSetTimerEvent(0.0);
+        llOwnerSay("@clear");
         return;
     }
     pick_random_message_time();
@@ -154,16 +152,17 @@ apply_config()
     {
         llListenControl(g_iGL, FALSE);
     }
-    llOwnerSay("Your brain feels like it's been filled with cotton candy. The ditzy haze is bliss and you can't remember ever feeling any other way. You are a bimbo!");
-    if (g_bLocked)
+
+    if(renamer_on)
     {
-        llOwnerSay("@detach=n");
+        llSetObjectName(renamer_full);
     }
     else
     {
-        llOwnerSay("@detach=y");
-        llOwnerSay("However the cotton candy in your brain has lifted just enough that you could clear your head . . . if you really wanted to.");
+        llSetObjectName(g_sWearer);
     }
+
+    llOwnerSay("Your brain feels like it's been filled with cotton candy. The ditzy haze is bliss and you can't remember ever feeling any other way. You are a bimbo!");
 }
 
 pick_random_message_time()
@@ -174,14 +173,15 @@ pick_random_message_time()
 
 apply_ditzy()
 {
+    if (global_disabled)
+    {
+        return;
+    }
+
     string clear = "@clear,notify:"+(string)(g_iChan+1)+";chat=add,notify:"+(string)(g_iChan+1)+";clear=add,notify:"+(string)(g_iChan+1)+";sendchannel_sec=add";
     if (!(outsideRLV & 1))
     {
         clear += ",sendchannel=n,sendchannel:"+(string)g_iChan+"=add,redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
-    }
-    if (g_bLocked)
-    {
-        clear += ",detach=n";
     }
     llOwnerSay(clear);
 
@@ -195,7 +195,6 @@ process_config(string data)
 {
     if (data == EOF)
     {
-        g_bGoodConfig=TRUE;
         apply_config();
         return;
     }
@@ -434,15 +433,6 @@ string process_emote(string message)
 
 talker_say(string message)
 {
-    string sOldName = llGetObjectName();
-    if(renamer_on)
-    {
-        llSetObjectName(renamer_full);
-    }
-    else
-    {
-        llSetObjectName(g_sWearer);
-    }
     if (outsideRLV & 2)
     {
         llWhisper(0, message);
@@ -451,12 +441,10 @@ talker_say(string message)
     {
         llSay(0, message);
     }
-    llSetObjectName(sOldName);
 }
 
 startup()
 {
-        llOwnerSay("@clear,detach=n");
         g_sWearer = llGetDisplayName(llGetOwner());
         rating_check_key = llRequestSimulatorData(llGetRegionName(), DATA_SIM_RATING);
 }
@@ -479,6 +467,27 @@ default
         llListenControl(g_iGL2, FALSE);
         startup();
         load_config();
+    }
+
+    link_message(integer sender_num, integer num, string str, key id)
+    {
+        if (num == 17)
+        {
+            if (str == "Bimbo")
+            {
+                global_disabled = FALSE;
+                phrases_allowed = TRUE;
+            }
+            else if (str == "Display")
+            {
+                phrases_allowed = FALSE;
+            }
+            else
+            {
+                global_disabled = TRUE;
+            }
+            apply_config();
+        }
     }
     listen(integer channel, string name, key id, string message)
     {
@@ -608,7 +617,7 @@ default
             }
             llOwnerSay("You no longer are spacing out.");
         }
-        else if (!(outsideRLV & 1) && is_safe_sim)
+        else if (!(outsideRLV & 1) && is_safe_sim && phrases_allowed)
         {
             if (num_bimbo_random > 0)
             {
@@ -655,49 +664,5 @@ default
                 is_safe_sim = TRUE;
             }
         }
-    }
-
-    touch_start(integer num_detected)
-    {
-        llResetTime();
-    }
-
-    touch_end(integer total_number)
-    {
-        if (!g_bGoodConfig)
-        {
-            return;
-        }
-
-        if(g_bLocked)
-        {
-            if(llDetectedKey(0) == llGetOwner())
-            {
-                llOwnerSay("Silly bimbo, you'll have to find somebody else to tinker with your brain!");
-                return;
-            }
-            else if (llGetTime() < 1.0)
-            {
-                llOwnerSay(llGetDisplayName(llDetectedKey(0))+ " tried to free your brain, but they didn't do it for long enough! Have them poke your forehead longer if you really want to release your mind.");
-            }
-            else
-            {
-                llRegionSayTo(llDetectedKey(0), 0, "You freed the lock on " + llGetDisplayName(llGetOwner()) + "'s mind!");
-                g_bLocked = FALSE;
-                llOwnerSay("@detach=y");
-                llOwnerSay("The cotton candy in your brain lifts just enough that you could clear your head . . . if you really wanted to. You're no longer locked into being a ditzy bimbo.");
-            }
-        }
-        else
-        {
-            if (llDetectedKey(0) != llGetOwner())
-            {
-                llRegionSayTo(llDetectedKey(0), 0, "You locked " + llGetDisplayName(llGetOwner()) + " into their ditzy state of mind! Somebody will have to fiddle with their forehead for a second if they want to get freed again.");
-            }
-            g_bLocked = TRUE;
-            llOwnerSay("@detach=n");
-            llOwnerSay("Your brain feels like it's been filled full of cotton candy! You're locked into being a ditzy bimbo!");
-        }
-        llSleep(0.5);
     }
 }
