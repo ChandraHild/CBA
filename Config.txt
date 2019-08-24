@@ -1,10 +1,10 @@
 # Programming by Flickrstar Timeless (better known as Esca), based on the ideas of SelaSteele, who developed the text. You can reach out for either of these girls for help, but they have been so conditioned by using their own product, no guarantees can be made about their present mental states when you read this. This product has been distributed to you for free, but any donations to them to help with their care in their feeble-minded conditions would be greatly appreciated. But please do not feel obligated. Enjoy! 
 
 # Enable renamer, y/n
-renamer_on=n
+renamer_on=y
 
 # Enable limited hearing, y/n
-listener_on=n
+listener_on=y
 
 #Enable bimbo talking, y/n
 bimbo_talk_on=y
@@ -14,27 +14,27 @@ ditzy_on=y
 
 # Prefix and/or name for renamer
 # renamer_prefix=Ditzy
-# renamer_name=Sela Silicone
+renamer_name=Candi
 
 # Percent chance to become ditzy when trying to talk
-ditzy_chance=2
+ditzy_chance=10
 
 # Duration of ditziness
-ditzy_min_time=30
-ditzy_max_time=120
+ditzy_min_time=60
+ditzy_max_time=180
 
 # How long is a long word and how many are allowed to slip out?
 bimbo_limit_long_say=n
-bimbo_long_word_size=7
-bimbo_long_word_count=1
+bimbo_long_word_size=6
+bimbo_long_word_count=0
 
 # RLV restrictions to apply when ditzy
-ditzy_rlv=startim,sendim,recvim,tplm,tploc,tplure,fly,temprun,alwaysrun,showinv,viewnote,touchall,showloc,showminimap,showworldmap,shownames
+ditzy_rlv=startim,tplm,tploc,tplure,fly,temprun,alwaysrun,showinv,viewnote,touchall,showloc,showminimap,showworldmap,shownames
 
 # recvemote,recvchat
 
 # Number of words to skip after we say a bimbo thing to stop repeats
-bimbo_say_skip=7
+bimbo_say_skip=4
 
 # Chance of inserting bimbo text per word
 bimbo_say_mid_chance=10
@@ -57,14 +57,14 @@ bimbo_say_mid=  . . . ummm . . .
 bimbo_say_mid=  . . . uhhh . . .
 
 # Chance to say bimbo things at start of say
-bimbo_say_pre_chance=15
+bimbo_say_pre_chance=40
 bimbo_say_pre=So like
 bimbo_say_pre=OMG
 bimbo_say_pre=Well like
 bimbo_say_pre=Ummmm . . . 
 
 #Chance to say bimbo things after say
-bimbo_say_post_chance=10
+bimbo_say_post_chance=20
 bimbo_say_post=and stuff
 
 # Replace words with bimboey words!
@@ -74,12 +74,12 @@ bimbo_say_replace=so|sooooo
 bimbo_say_replace=hot|hawt
 bimbo_say_replace=hi|hiiiii
 
-bimbo_emote_post_chance=10
+bimbo_emote_post_chance=20
 bimbo_emote_post=and has a vacant stare
 bimbo_emote_post=and her eyes get a little glossy
 bimbo_emote_post=and seems a little oblivious to her surroundings
 bimbo_emote_post=and has a distant look
 
 # Min/max time before a random saying happens
-bimbo_random_min=1200
-bimbo_random_max=2400
+bimbo_random_min=120
+bimbo_random_max=480
