@@ -174,10 +174,10 @@ pick_random_message_time()
 
 apply_ditzy()
 {
-    string clear = "@clear,notify:"+(string)(g_iChan+1)+";chat=add,notify:"+(string)(g_iChan+1)+";clear=add,notify:"+(string)(g_iChan+1)+";sendchannel=add";
+    string clear = "@clear,notify:"+(string)(g_iChan+1)+";chat=add,notify:"+(string)(g_iChan+1)+";clear=add,notify:"+(string)(g_iChan+1)+";sendchannel_sec=add";
     if (!(outsideRLV & 1))
     {
-        clear += ",redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
+        clear += ",sendchannel=n,sendchannel:"+(string)g_iChan+"=add,redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
     }
     if (g_bLocked)
     {
@@ -542,13 +542,13 @@ default
             gagCheck=2;
             foundRLV=0;
             llOwnerSay("@getstatusall:chat="+(string)(g_iChan+2));
-            llOwnerSay("@getstatusall:sendchannel="+(string)(g_iChan+2));
+            llOwnerSay("@getstatusall:sendchannel_sec="+(string)(g_iChan+2));
         }
         if (channel == g_iChan+2)
         {
             --gagCheck;
             list messages = llParseString2List(message, ["/"], []);
-            list gags = ["sendchat", "sendchannel", "sendchannel_sec"];
+            list gags = ["sendchat", "sendchannel_sec"];
             integer curmess = 0;
             integer totmess = llGetListLength(messages);
             for (; curmess < totmess; curmess++)
@@ -566,14 +566,9 @@ default
             if (gagCheck == 0)
             {
                 llListenControl(g_iGL2, FALSE);
-                integer statusrefresh = FALSE;
                 if (foundRLV != outsideRLV)
                 {
                     outsideRLV = foundRLV;
-                    statusrefresh = TRUE;
-                }
-                if (statusrefresh)
-                {
                     apply_ditzy();
                 }
             }
