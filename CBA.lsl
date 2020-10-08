@@ -135,11 +135,11 @@ apply_config()
     if (bimbo_talk_on || renamer_on)
     {
         renamer_full = "";
-        if (renamer_prefix != "")
+        if (renamer_prefix)
         {
             renamer_full += renamer_prefix + " ";
         }
-        if (renamer_name != "")
+        if (renamer_name)
         {
             renamer_full += renamer_name;
         } else
@@ -200,7 +200,7 @@ process_config(string data)
         return;
     }
     
-    if (data != "")
+    if (data)
     {
         if (llSubStringIndex(data, "#") != 0)
         {
@@ -526,7 +526,7 @@ default
                         sOut = process_say(message);
                     }
                 }
-                if (sOut != "")
+                if (sOut)
                 {
                     talker_say(sOut);
                 }
