@@ -33,6 +33,8 @@ integer bimbo_emote_post_chance=100;
 list bimbo_emote_post;
 integer bimbo_random_min=120;
 integer bimbo_random_max=480;
+integer bimbo_long_word_size=7;
+integer bimbo_long_word_count=1;
 integer num_bimbo_random;
 integer num_ditzy_end;
 integer num_ditzy_text;
@@ -326,6 +328,14 @@ default
                         {
                             bimbo_random_max = (integer)value;
                         }
+                        else if (name == "bimbo_long_word_size")
+                        {
+                            bimbo_long_word_size = (integer)value;
+                        }
+                        else if (name == "bimbo_long_word_count")
+                        {
+                            bimbo_long_word_count = (integer)value;
+                        }
                     }
                 }
             }
@@ -500,11 +510,20 @@ state on
 
                 integer bimbo_distance = 0;
                 integer x = 0;
+                integer long_words = 0;
                 integer listlen = llGetListLength(mid);
                 integer blistlen = llGetListLength(bimbo_say_replace);
                 for (; x < listlen; ++x)
                 {
                     string y = llList2String(mid, x);
+                    if (llStringLength(y) >= bimbo_long_word_size)
+                    {
+                        ++long_words;
+                        if (long_words > bimbo_long_word_count)
+                        {
+                            y = "stuff";
+                        }
+                    }
                     integer z;
                     for (; z < blistlen; ++z)
                     {

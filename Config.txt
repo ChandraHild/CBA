@@ -20,6 +20,9 @@ ditzy_chance=2
 ditzy_min_time=30
 ditzy_max_time=120
 
+# How long is a long word and how many are allowed to slip out?
+bimbo_long_word_size=7
+bimbo_long_word_count=1
 
 # RLV restrictions to apply when ditzy
 ditzy_rlv=startim,sendim,recvim,tplm,tploc,tplure,fly,temprun,alwaysrun,showinv,viewnote,touchall,showloc,showminimap,showworldmap,shownames
