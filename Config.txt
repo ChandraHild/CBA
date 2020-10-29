@@ -3,6 +3,9 @@
 # Enable renamer, y/n
 renamer_on=n
 
+# Enable limited hearing, y/n
+listener_on=n
+
 #Enable bimbo talking, y/n
 bimbo_talk_on=y
 

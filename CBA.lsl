@@ -12,6 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // Config variables
 //    These will get set by notecard
 integer renamer_on;
+integer listener_on;
 integer bimbo_talk_on;
 integer ditzy_on;
 string renamer_name;
@@ -52,6 +53,7 @@ integer g_iConfigLine;
 integer g_iGL;
 integer g_iGL2;
 integer g_iChan;
+integer g_public_chat;
 integer g_bIsDitzy;
 integer outsideRLV=0; // 1 for gag, 2 for whisper
 integer foundRLV=0; // 1 for gag, 2 for whisper
@@ -78,7 +80,9 @@ apply_config()
     rating_check_key = llRequestSimulatorData(llGetRegionName(), DATA_SIM_RATING);
 
     pick_random_message_time();
-    
+
+    llListenControl(g_public_chat, listener_on);
+
     if (bimbo_talk_on || renamer_on)
     {
         renamer_full = "";
@@ -124,6 +128,10 @@ apply_ditzy()
     if (!(outsideRLV & 1))
     {
         clear += ",sendchannel=n,sendchannel:"+(string)g_iChan+"=add,redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
+        if (listener_on)
+        {
+            clear += ",recvchat=n,recvemote=n";
+        }
     }
     llOwnerSay(clear);
 
@@ -245,6 +253,10 @@ default
                         if (name == "renamer_on")
                         {
                             renamer_on = istrue(value);
+                        }
+                        else if (name == "listener_on")
+                        {
+                            listener_on = istrue(value);
                         }
                         else if (name == "bimbo_talk_on")
                         {
@@ -425,6 +437,7 @@ state on
         g_iGL = llListen(g_iChan, "", llGetOwner(), "");
         llListen(g_iChan+1, "", llGetOwner(), "");
         g_iGL2 = llListen(g_iChan+2, "", llGetOwner(), "");
+        g_public_chat = llListen(0, "", NULL_KEY, "");
         llListenControl(g_iGL, FALSE);
         llListenControl(g_iGL2, FALSE);
         apply_config();
@@ -438,7 +451,49 @@ state on
 
     listen(integer channel, string name, key id, string message)
     {
-        if (channel == g_iChan)
+        if (channel == 0)
+        {
+            key owner = llGetOwnerKey(id);
+            if (owner == llGetOwner())
+            {
+                return;
+            }
+
+            string old_name = llGetObjectName();
+            if (owner == id)
+            {
+                llSetObjectName(llGetDisplayName(id));
+            }
+            else
+            {
+                llSetObjectName(name);
+            }
+
+            if (llGetSubString(message, 0, 2) != "/me")
+            {
+                list mid = llParseStringKeepNulls(message, [], [" ", ".", ",", "?", "!", ":", ";"]);
+                message = "";
+                integer x = 0;
+                integer long_words = 0;
+                integer listlen = llGetListLength(mid);
+                for (; x < listlen; ++x)
+                {
+                    string y = llList2String(mid, x);
+                    if (llStringLength(y) >= bimbo_long_word_size)
+                    {
+                        ++long_words;
+                        if (long_words > bimbo_long_word_count)
+                        {
+                            y = "blah";
+                        }
+                    }
+                    message += y;
+                }
+            }
+            llOwnerSay(message);
+            llSetObjectName(old_name);
+        }
+        else if (channel == g_iChan)
         {
             if(g_bIsDitzy)
             {
