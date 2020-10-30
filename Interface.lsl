@@ -27,7 +27,7 @@ default
                 else
                 {
                     llRegionSayTo(llDetectedKey(0), 0, "You freed the lock on " + llGetDisplayName(llGetOwner()) + "'s mind!");
-                    llMessageLinked(LINK_THIS, 17, "Regular", "");
+                    llMessageLinked(LINK_ALL_CHILDREN, 17, "Regular", "");
                     g_bLocked = FALSE;
                 }
             }
@@ -38,7 +38,7 @@ default
             {
                 llRegionSayTo(llDetectedKey(0), 0, "You locked " + llGetDisplayName(llGetOwner()) + " into their ditzy state of mind! Somebody will have to fiddle with their forehead for a second if they want to get freed again.");
             }
-            llMessageLinked(LINK_THIS, 17, "Bimbo", "");
+            llMessageLinked(LINK_ALL_CHILDREN, 17, "Bimbo", "");
             g_bLocked = TRUE;
         }
 
