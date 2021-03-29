@@ -508,119 +508,122 @@ state on
                 return;
             }
 
-            if (llGetSubString(message, 0, 2) == "/me")
+            if (bimbo_talk_on)
             {
-                // Emote processing
-                if ((100-bimbo_emote_post_chance) <= (integer)llFrand(100))
+                if (llGetSubString(message, 0, 2) == "/me")
                 {
-                    integer length = llStringLength(message);
-                    string posttext = list_random(bimbo_emote_post);
-                    if (!is_punctuation(llGetSubString(posttext, 0, 0)))
+                    // Emote processing
+                    if ((100-bimbo_emote_post_chance) <= (integer)llFrand(100))
                     {
-                        posttext = " " + posttext;
-                    }
-
-                    if(is_punctuation(llGetSubString(message, -1,-1)))
-                    {
-                        message = llInsertString(message, length-1, posttext);
-                    }
-                    else
-                    {
-                        message += posttext;
-                    }
-                }
-            }
-            else
-            {
-                // Say processing
-                // First, check to see if ditzy triggers . . .
-                if ((100-ditzy_chance) <= (integer)llFrand(100))
-                {
-                    // Space out time!
-                    llSetTimerEvent(0);
-                    g_bIsDitzy = TRUE;
-                    apply_ditzy();
-                    integer timediff = ditzy_max_time - ditzy_min_time;
-                    llSetTimerEvent(llFrand((float)timediff) + (float)ditzy_min_time);
-                    if (num_ditzy_text > 0)
-                    {
-                        say_key = llGetNotecardLine("ditzy-text", (integer)llFrand((float)num_ditzy_text));
-                    }
-                    llOwnerSay("You are spacing out for a bit!");
-                    return;
-                }
-
-                list mid = llParseStringKeepNulls(message, [], [" ", ".", ",", "?", "!", ":", ";"]);
-                message = "";
-                if ((100-bimbo_say_pre_chance) <= (integer)llFrand(100))
-                {
-                    message = list_random(bimbo_say_pre) + " ";
-                    string firstword = llList2String(mid, 0);
-                    if (firstword != "I")
-                    {
-                        string firstletter = llToLower(llGetSubString(firstword, 0, 0));
-                        mid = llListReplaceList(mid, [llInsertString(llDeleteSubString(firstword, 0, 0), 0, firstletter)], 0, 0);
-                    }
-                }
-
-                integer bimbo_distance = 0;
-                integer x = 0;
-                integer long_words = 0;
-                integer listlen = llGetListLength(mid);
-                integer blistlen = llGetListLength(bimbo_say_replace);
-                for (; x < listlen; ++x)
-                {
-                    string y = llList2String(mid, x);
-                    if (llStringLength(y) >= bimbo_long_word_size)
-                    {
-                        ++long_words;
-                        if (long_words > bimbo_long_word_count)
+                        integer length = llStringLength(message);
+                        string posttext = list_random(bimbo_emote_post);
+                        if (!is_punctuation(llGetSubString(posttext, 0, 0)))
                         {
-                            y = "stuff";
+                            posttext = " " + posttext;
+                        }
+
+                        if(is_punctuation(llGetSubString(message, -1,-1)))
+                        {
+                            message = llInsertString(message, length-1, posttext);
+                        }
+                        else
+                        {
+                            message += posttext;
                         }
                     }
-                    integer z;
-                    for (; z < blistlen; ++z)
+                }
+                else
+                {
+                    // Say processing
+                    // First, check to see if ditzy triggers . . .
+                    if ((100-ditzy_chance) <= (integer)llFrand(100))
                     {
-                        list replace = llParseStringKeepNulls(llList2String(bimbo_say_replace, z), ["|"], []);
-                        if (y == llList2String(replace, 0))
+                        // Space out time!
+                        llSetTimerEvent(0);
+                        g_bIsDitzy = TRUE;
+                        apply_ditzy();
+                        integer timediff = ditzy_max_time - ditzy_min_time;
+                        llSetTimerEvent(llFrand((float)timediff) + (float)ditzy_min_time);
+                        if (num_ditzy_text > 0)
                         {
-                            y = llList2String(replace, 1);
+                            say_key = llGetNotecardLine("ditzy-text", (integer)llFrand((float)num_ditzy_text));
+                        }
+                        llOwnerSay("You are spacing out for a bit!");
+                        return;
+                    }
+
+                    list mid = llParseStringKeepNulls(message, [], [" ", ".", ",", "?", "!", ":", ";"]);
+                    message = "";
+                    if ((100-bimbo_say_pre_chance) <= (integer)llFrand(100))
+                    {
+                        message = list_random(bimbo_say_pre) + " ";
+                        string firstword = llList2String(mid, 0);
+                        if (firstword != "I")
+                        {
+                            string firstletter = llToLower(llGetSubString(firstword, 0, 0));
+                            mid = llListReplaceList(mid, [llInsertString(llDeleteSubString(firstword, 0, 0), 0, firstletter)], 0, 0);
                         }
                     }
-                    message += y;
-                    if (!is_punctuation(y) && y != "")
+
+                    integer bimbo_distance = 0;
+                    integer x = 0;
+                    integer long_words = 0;
+                    integer listlen = llGetListLength(mid);
+                    integer blistlen = llGetListLength(bimbo_say_replace);
+                    for (; x < listlen; ++x)
                     {
-                        if (bimbo_distance > 0) --bimbo_distance;
-                        if (bimbo_distance == 0 && (100-bimbo_say_mid_chance) <= (integer)llFrand(100))
+                        string y = llList2String(mid, x);
+                        if (llStringLength(y) >= bimbo_long_word_size)
                         {
-                            string midtext = list_random(bimbo_say_mid);
-                            if (!is_punctuation(llGetSubString(midtext, 0, 0)))
+                            ++long_words;
+                            if (long_words > bimbo_long_word_count)
                             {
-                                message += " ";
+                                y = "stuff";
                             }
-                            message += midtext;
-                            bimbo_distance = bimbo_say_skip;
+                        }
+                        integer z;
+                        for (; z < blistlen; ++z)
+                        {
+                            list replace = llParseStringKeepNulls(llList2String(bimbo_say_replace, z), ["|"], []);
+                            if (y == llList2String(replace, 0))
+                            {
+                                y = llList2String(replace, 1);
+                            }
+                        }
+                        message += y;
+                        if (!is_punctuation(y) && y != "")
+                        {
+                            if (bimbo_distance > 0) --bimbo_distance;
+                            if (bimbo_distance == 0 && (100-bimbo_say_mid_chance) <= (integer)llFrand(100))
+                            {
+                                string midtext = list_random(bimbo_say_mid);
+                                if (!is_punctuation(llGetSubString(midtext, 0, 0)))
+                                {
+                                    message += " ";
+                                }
+                                message += midtext;
+                                bimbo_distance = bimbo_say_skip;
+                            }
                         }
                     }
-                }
 
-                if ((100-bimbo_say_post_chance) <= (integer)llFrand(100))
-                {
-                    integer length = llStringLength(message);
-                    string posttext = list_random(bimbo_say_post);
-                    if (!is_punctuation(llGetSubString(posttext, 0, 0)))
+                    if ((100-bimbo_say_post_chance) <= (integer)llFrand(100))
                     {
-                        posttext = " " + posttext;
-                    }
+                        integer length = llStringLength(message);
+                        string posttext = list_random(bimbo_say_post);
+                        if (!is_punctuation(llGetSubString(posttext, 0, 0)))
+                        {
+                            posttext = " " + posttext;
+                        }
 
-                    if (is_punctuation(llGetSubString(message, -1,-1)))
-                    {
-                        message = llInsertString(message, length-1, posttext);
-                    }
-                    else
-                    {
-                        message += posttext;
+                        if (is_punctuation(llGetSubString(message, -1,-1)))
+                        {
+                            message = llInsertString(message, length-1, posttext);
+                        }
+                        else
+                        {
+                            message += posttext;
+                        }
                     }
                 }
             }
@@ -706,7 +709,7 @@ state on
         }
         else if (!(outsideRLV & 1) && is_safe_sim && phrases_allowed)
         {
-            if (num_bimbo_random > 0)
+            if (bimbo_talk_on && num_bimbo_random > 0)
             {
                 say_key = llGetNotecardLine("bimbo-random", (integer)llFrand((float)num_bimbo_random));
             }
