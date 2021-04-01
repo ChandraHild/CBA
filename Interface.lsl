@@ -24,7 +24,7 @@ default
     {
         if(g_bLocked)
         {
-            key poker = llDetectedKey(0);
+            string poker = (string)llDetectedKey(0);
             if(poker == llGetOwner())
             {
                 llOwnerSay("Silly bimbo, you'll have to find somebody else to tinker with your brain!");
@@ -34,11 +34,11 @@ default
             {
                 if (llGetTime() < 1.0)
                 {
-                    llOwnerSay(llGetDisplayName(llDetectedKey(0))+ " tried to free your brain, but they didn't do it for long enough! Have them poke your forehead longer if you really want to release your mind.");
+                    llOwnerSay(llGetDisplayName(poker)+ " tried to free your brain, but they didn't do it for long enough! Have them poke your forehead longer if you really want to release your mind.");
                 }
                 else
                 {
-                    llRegionSayTo(llDetectedKey(0), 0, "You freed the lock on " + llGetDisplayName(llGetOwner()) + "'s mind!");
+                    llRegionSayTo(poker, 0, "You freed the lock on " + llGetDisplayName(llGetOwner()) + "'s mind!");
                     llMessageLinked(LINK_ALL_CHILDREN, 17, "Regular", "");
                     g_bLocked = FALSE;
                     refresh_RLV();
