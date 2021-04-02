@@ -57,7 +57,6 @@ integer g_public_chat;
 integer g_bIsDitzy;
 integer outsideRLV=0; // 1 for gag, 2 for whisper
 integer foundRLV=0; // 1 for gag, 2 for whisper
-integer gagCheck=0;
 integer is_safe_sim;
 integer phrases_allowed = TRUE;
 
@@ -124,10 +123,10 @@ pick_random_message_time()
 
 apply_ditzy()
 {
-    string clear = "@clear,notify:"+(string)(g_iChan+1)+";chat=add,notify:"+(string)(g_iChan+1)+";clear=add,notify:"+(string)(g_iChan+1)+";sendchannel_sec=add";
+    string clear = "@clear,notify:"+(string)(g_iChan+1)+";chat=add,notify:"+(string)(g_iChan+1)+";clear=add";
     if (!(outsideRLV & 1))
     {
-        clear += ",sendchannel=n,sendchannel:"+(string)g_iChan+"=add,redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
+        clear += ",redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
         if (listener_on)
         {
             clear += ",recvchat=n,recvemote=n";
@@ -639,22 +638,18 @@ state on
                 return;
             }
             llListenControl(g_iGL2, TRUE);
-            gagCheck=2;
             foundRLV=0;
             llOwnerSay("@getstatusall:chat="+(string)(g_iChan+2));
-            llOwnerSay("@getstatusall:sendchannel_sec="+(string)(g_iChan+2));
         }
         else if (channel == g_iChan+2)
         {
-            --gagCheck;
             list messages = llParseString2List(message, ["/"], []);
-            list gags = ["sendchat", "sendchannel_sec"];
             integer curmess = 0;
             integer totmess = llGetListLength(messages);
             for (; curmess < totmess; ++curmess)
             {
                 string rlvcmd = llList2String(messages, curmess);
-                if (~llListFindList(gags, [rlvcmd]))
+                if (rlvcmd == "sendchat" || (llGetSubString(rlvcmd, 0, 8) == "redirchat" && rlvcmd != "redirchat:"+(string)(g_iChan)))
                 {
                     foundRLV = foundRLV | 1;
                 }
@@ -663,14 +658,12 @@ state on
                     foundRLV = foundRLV | 2;
                 }
             }
-            if (gagCheck == 0)
+
+            llListenControl(g_iGL2, FALSE);
+            if (foundRLV != outsideRLV)
             {
-                llListenControl(g_iGL2, FALSE);
-                if (foundRLV != outsideRLV)
-                {
-                    outsideRLV = foundRLV;
-                    apply_ditzy();
-                }
+                outsideRLV = foundRLV;
+                apply_ditzy();
             }
         }
     }
