@@ -34,6 +34,8 @@ integer bimbo_emote_post_chance=100;
 list bimbo_emote_post;
 integer bimbo_random_min=120;
 integer bimbo_random_max=480;
+integer bimbo_limit_long_hear;
+integer bimbo_limit_long_say;
 integer bimbo_long_word_size=7;
 integer bimbo_long_word_count=1;
 integer num_bimbo_random;
@@ -347,6 +349,14 @@ default
                         {
                             bimbo_long_word_count = (integer)value;
                         }
+                        else if (name == "bimbo_limit_long_say")
+                        {
+                            bimbo_limit_long_say = istrue(value);
+                        }
+                        else if (name == "bimbo_limit_long_hear")
+                        {
+                            bimbo_limit_long_hear = istrue(value);
+                        }
                     }
                 }
             }
@@ -478,12 +488,15 @@ state on
                 for (; x < listlen; ++x)
                 {
                     string y = llList2String(mid, x);
-                    if (llStringLength(y) >= bimbo_long_word_size)
+                    if (bimbo_limit_long_hear)
                     {
-                        ++long_words;
-                        if (long_words > bimbo_long_word_count)
+                        if (llStringLength(y) >= bimbo_long_word_size)
                         {
-                            y = "blah";
+                            ++long_words;
+                            if (long_words > bimbo_long_word_count)
+                            {
+                                y = "blah";
+                            }
                         }
                     }
                     message += y;
@@ -572,12 +585,15 @@ state on
                     for (; x < listlen; ++x)
                     {
                         string y = llList2String(mid, x);
-                        if (llStringLength(y) >= bimbo_long_word_size)
+                        if (bimbo_limit_long_say)
                         {
-                            ++long_words;
-                            if (long_words > bimbo_long_word_count)
+                            if (llStringLength(y) >= bimbo_long_word_size)
                             {
-                                y = "stuff";
+                                ++long_words;
+                                if (long_words > bimbo_long_word_count)
+                                {
+                                    y = "stuff";
+                                }
                             }
                         }
                         integer z;
