@@ -129,11 +129,12 @@ apply_ditzy()
     if (!(outsideRLV & 1))
     {
         clear += ",redirchat:"+(string)g_iChan+"=add,rediremote:"+(string)g_iChan+"=add";
-        if (listener_on)
-        {
-            clear += ",recvchat=n,recvemote=n";
-        }
     }
+    if (listener_on)
+    {
+        clear += ",recvchat=n,recvemote=n";
+    }
+
     llOwnerSay(clear);
 
     if (g_bIsDitzy)
