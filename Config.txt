@@ -25,7 +25,6 @@ ditzy_max_time=120
 
 # How long is a long word and how many are allowed to slip out?
 bimbo_limit_long_say=n
-bimbo_limit_long_hear=n
 bimbo_long_word_size=7
 bimbo_long_word_count=1
 

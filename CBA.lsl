@@ -34,7 +34,6 @@ integer bimbo_emote_post_chance=100;
 list bimbo_emote_post;
 integer bimbo_random_min=120;
 integer bimbo_random_max=480;
-integer bimbo_limit_long_hear;
 integer bimbo_limit_long_say;
 integer bimbo_long_word_size=7;
 integer bimbo_long_word_count=1;
@@ -68,11 +67,7 @@ integer istrue(string data)
    {
        return TRUE;
     }
-    else
-    {
-        return FALSE;
-    }
-    
+    return FALSE;  
 }
 
 apply_config()
@@ -354,10 +349,6 @@ default
                         {
                             bimbo_limit_long_say = istrue(value);
                         }
-                        else if (name == "bimbo_limit_long_hear")
-                        {
-                            bimbo_limit_long_hear = istrue(value);
-                        }
                     }
                 }
             }
@@ -490,15 +481,12 @@ state on
                 for (; x < listlen; ++x)
                 {
                     string y = llList2String(mid, x);
-                    if (bimbo_limit_long_hear)
+                    if (llStringLength(y) >= bimbo_long_word_size)
                     {
-                        if (llStringLength(y) >= bimbo_long_word_size)
+                        ++long_words;
+                        if (long_words > bimbo_long_word_count)
                         {
-                            ++long_words;
-                            if (long_words > bimbo_long_word_count)
-                            {
-                                y = "blah";
-                            }
+                            y = "blah";
                         }
                     }
                     message += y;
