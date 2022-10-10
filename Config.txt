@@ -14,7 +14,7 @@ ditzy_on=y
 
 # Prefix and/or name for renamer
 # renamer_prefix=Ditzy
-renamer_name=Candi
+renamer_name=Bimbun
 
 # Percent chance to become ditzy when trying to talk
 ditzy_chance=10
