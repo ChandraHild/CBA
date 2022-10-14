@@ -483,10 +483,10 @@ state on
                 {
                     string y = llList2String(mid, x);
                     integer wordlen = llStringLength(y);
-                    if (wordlen >= 5)
+                    if (wordlen >= bimbo_long_word_size)
                     {
                         ++long_words;
-                        if (long_words > 0)
+                        if (long_words > bimbo_long_word_count)
                         {
                             string sortedword;
                             sortedword += llGetSubString(y, 0, 0);
