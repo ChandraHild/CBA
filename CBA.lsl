@@ -483,14 +483,15 @@ state on
                 {
                     string y = llList2String(mid, x);
                     integer wordlen = llStringLength(y);
-                    if (wordlen >= bimbo_long_word_size)
+                    if (g_bIsDitzy || wordlen >= bimbo_long_word_size)
                     {
                         ++long_words;
-                        if (long_words > bimbo_long_word_count)
+                        if (g_bIsDitzy || long_words > bimbo_long_word_count)
                         {
                             string sortedword;
                             sortedword += llGetSubString(y, 0, 0);
                             y = llDeleteSubString(y, 0, 0);
+                            --wordlen;
                             while (wordlen > 0)
                             {
                                 integer randpos = (integer)llFrand((float)wordlen);
