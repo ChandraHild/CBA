@@ -461,15 +461,16 @@ state on
             }
 
             string old_name = llGetObjectName();
-            llSetObjectName(".");
+            llSetObjectName(" ");
+
             if (owner == id)
             {
-                name = "secondlife:///app/agent/" + (string)id + "/about";
+                name = llGetDisplayName(id);
             }
 
             if (llGetSubString(message, 0, 2) == "/me")
             {
-                message = "*" + llGetSubString(message, 4, -1) + "*";
+                llOwnerSay(name + " " + llGetSubString(message, 4, -1))
             }
             else
             {
@@ -491,8 +492,8 @@ state on
                     }
                     message += y;
                 }
+                llOwnerSay(name + ": " + message);
             }
-            llOwnerSay(name + ": " + message);
             llSetObjectName(old_name);
         }
         else if (channel == g_iChan)
