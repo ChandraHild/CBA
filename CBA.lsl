@@ -476,18 +476,29 @@ state on
             {
                 list mid = llParseStringKeepNulls(message, [], [" ", ".", ",", "?", "!", ":", ";"]);
                 message = "";
-                integer x = 0;
-                integer long_words = 0;
+                integer x;
+                integer long_words;
                 integer listlen = llGetListLength(mid);
                 for (; x < listlen; ++x)
                 {
                     string y = llList2String(mid, x);
-                    if (llStringLength(y) >= bimbo_long_word_size)
+                    integer wordlen = llStringLength(y);
+                    if (wordlen >= 5)
                     {
                         ++long_words;
-                        if (long_words > bimbo_long_word_count)
+                        if (long_words > 0)
                         {
-                            y = "blah";
+                            string sortedword;
+                            sortedword += llGetSubString(y, 0, 0);
+                            y = llDeleteSubString(y, 0, 0);
+                            while (wordlen > 0)
+                            {
+                                integer randpos = (integer)llFrand((float)wordlen);
+                                sortedword += llGetSubString(y, randpos, randpos);
+                                y = llDeleteSubString(y, randpos, randpos);
+                                --wordlen;
+                            }
+                            y = sortedword;
                         }
                     }
                     message += y;
