@@ -470,7 +470,7 @@ state on
 
             if (llGetSubString(message, 0, 2) == "/me")
             {
-                llOwnerSay(name + " " + llGetSubString(message, 4, -1))
+                llOwnerSay(name + " " + llGetSubString(message, 4, -1));
             }
             else
             {
